@@ -1,10 +1,16 @@
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
+import java.util.Locale;
+import java.util.Scanner;
 
 public class Main {
 
@@ -25,7 +31,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
         run(scanner);
     }
 
@@ -275,20 +281,20 @@ public class Main {
 
         int totalNotes = loadNotes().size();
 
-        String monitoringData = """
-                ===== MONITORING OUTPUT =====
-                timestamp=%s
-                uptime_seconds=%d
-                commands_executed=%d
-                total_notes=%d
-                notes_added_in_session=%d
-                list_requests_in_session=%d
-                successful_note_views_in_session=%d
-                note_not_found_count=%d
-                errors_count=%d
-                status=UP
-                =============================
-                """.formatted(
+        String monitoringData = String.format(
+                Locale.ROOT,
+                "===== MONITORING OUTPUT =====%n"
+                        + "timestamp=%s%n"
+                        + "uptime_seconds=%d%n"
+                        + "commands_executed=%d%n"
+                        + "total_notes=%d%n"
+                        + "notes_added_in_session=%d%n"
+                        + "list_requests_in_session=%d%n"
+                        + "successful_note_views_in_session=%d%n"
+                        + "note_not_found_count=%d%n"
+                        + "errors_count=%d%n"
+                        + "status=UP%n"
+                        + "=============================%n",
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 uptimeSeconds,
                 commandsExecuted,
