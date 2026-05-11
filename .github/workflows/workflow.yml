@@ -1,0 +1,115 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Build, Test, Lint and Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: Install dependencies and build project
+        run: ./gradlew clean build
+
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Generate application logs and monitoring output
+        run: |
+          printf "1\nCI Note\nGenerated during pipeline\n2\n4\n0\n" | ./gradlew run
+
+      - name: Upload logs and monitoring output
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: logs-and-monitoring
+          path: |
+            app.log
+            monitoring-output.txt
+
+      - name: Run code linting with Checkstyle
+        run: ./gradlew checkstyleMain
+
+      - name: Run SAST with SpotBugs
+        run: ./gradlew spotbugsMain
+
+      - name: Run dependency vulnerability scan
+        run: ./gradlew dependencyCheckAnalyze
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: notes-cli-build
+          path: |
+            build/libs/*.jar
+            build/reports/
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: notes-cli-build
+          path: ./artifact
+
+      - name: Simulate staging deployment
+        run: |
+          echo "Starting deployment to STAGING environment..."
+          echo "Artifact files:"
+          ls -R ./artifact
+          echo "Running simulated deployment for Notes CLI..."
+          echo "Deployment to STAGING completed successfully."
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: notes-cli-build
+          path: ./artifact
+
+      - name: Simulate production deployment
+        run: |
+          echo "Starting deployment to PRODUCTION environment..."
+          echo "Artifact files:"
+          ls -R ./artifact
+          echo "Running simulated deployment for Notes CLI..."
+          echo "Deployment to PRODUCTION completed successfully."
