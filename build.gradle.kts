@@ -40,4 +40,8 @@ spotbugs {
 dependencyCheck {
     failBuildOnCVSS = 7.0F
     formats = listOf("HTML", "XML")
+
+    nvd {
+        apiKey = System.getenv("NVD_API_KEY") ?: ""
+    }
 }
