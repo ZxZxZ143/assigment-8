@@ -44,4 +44,6 @@ dependencyCheck {
     nvd {
         apiKey = System.getenv("NVD_API_KEY") ?: ""
     }
+
+    scanConfigurations = listOf("runtimeClasspath")
 }

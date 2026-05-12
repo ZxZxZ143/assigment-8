@@ -17,6 +17,8 @@ jobs:
   ci:
     name: Build, Test, Lint and Security Scan
     runs-on: ubuntu-latest
+    env:
+      NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
     steps:
       - name: Checkout repository
